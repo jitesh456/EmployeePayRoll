@@ -20,7 +20,7 @@ const createInnerHtml = () => {
     for (const element of employeeArray) {
         // template literal es6 feature
         newhtml = `${newhtml}<tr>
-        <td><img class="profile" src="${element.profileUrl}" alt=""></td>
+        <td><img class="profile" src="${element.profilePic}" alt=""></td>
         <td>${element._name}</td>
         <td>${element.gender}</td>
         <td>${getDepartMentHtml(element.department)}</td>
@@ -52,13 +52,14 @@ const remove = (id) => {
 }
 
 const update = (id) => {
-    debugger;
+    
    // ajaxCall("GET", "http://localhost:3000/employee");
     var employee = employeeArray.find(ele => ele.id == id)
-    localStorage.setItem('employee', JSON.stringify(employeeArray))
+    //localStorage.setItem('employee', JSON.stringify(employeeArray))
     localStorage.setItem('editEmp', JSON.stringify(employee))
     window.location.replace("../pages/new_payroll_form.html");
 }
+
 getEmployeeData();
 /**
  * getData from json server

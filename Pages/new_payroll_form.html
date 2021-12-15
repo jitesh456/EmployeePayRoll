@@ -165,6 +165,28 @@
   <script >
   
 
+let isUpdate = false;
+let employeePayrollObj = {};
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    const name = document.querySelector('#name');
+    name.addEventListener('input', function() {
+        if(name.value.length == 0) {
+            setTextValue('.text-error', "");
+            return;
+        }
+        try {
+            (new EmployeePayrollData()).name = name.value;
+            setTextValue('.text-error', "");
+        } catch (e) {
+            setTextValue('.text-error', e);
+        }
+    });
+
+    
+
+    checkForUpdate();
+});
 const save = () => {
 try {
 
@@ -180,7 +202,18 @@ function createAndUpdateStorage(employeePayrollData){
 
     let employeePayrollList = JSON.parse(localStorage.getItem("EmployeePayrollList"));
 
-    if(employeePayrollList != undefined){
+    if(isUpdate==true)
+    {
+      const employeePayrollJson = localStorage.getItem('editEmp');
+      employeePayrollObj = JSON.parse(employeePayrollJson);
+      employeePayrollList= employeePayrollList.filter(x=>x.id!=employeePayrollObj.id)
+       
+        employeePayrollData.id=employeePayrollObj.id
+        employeePayrollList.push(employeePayrollData);
+        localStorage.removeItem('editEmp');
+        isUpdate=false;
+    }
+    else if(employeePayrollList != undefined){
         var last=employeePayrollList.pop();
         employeePayrollData.id=last.id+1;
         employeePayrollList.push(last);
@@ -201,6 +234,7 @@ try {
   employeePayrollData.department = getSelectedValues('[name=department]');
   employeePayrollData.salary = getInputValueById('#salary');
   employeePayrollData.note = getInputValueById('#notes');
+  employeePayrollData.profilePic=getSelectedValues('[name=profile]').pop();
   let date = getInputValueById('#day')+" "+getInputValueById('#month')+" "+
            getInputValueById('#year') ;
   employeePayrollData.date=date;
@@ -230,24 +264,15 @@ allItems.forEach(item => {
 });    
 return selItems;
 } 
-function setData()
-{
-  let empdata=JSON.parse(localStorage.getItem("editEmp"))
-  setValue("#name",empdata.name);
-  setValue("#notes",empdata.notes);
- 
-
- name.value=empdata.name;
-}
-
-const setTextValue = (id, value) => {
-    const element = document.querySelector(id);
-    element.textContent = value;
-}
 
 const setValue = (id, value) => {
     const element = document.querySelector(id);
     element.value = value;
+}
+
+const setSelectedIndex = (id, index) => {
+    const element = document.querySelector(id);
+    element.selectedIndex = index;
 }
 
 const resetForm = () => {
@@ -267,7 +292,39 @@ const unsetSelectedValues = (propertyValue) => {
         item.checked = false;
     });    
 }
-setData();
+const checkForUpdate = () => {
+    const employeePayrollJson = localStorage.getItem('editEmp');
+    isUpdate = employeePayrollJson ? true : false;
+    if (!isUpdate) return;
+    employeePayrollObj = JSON.parse(employeePayrollJson);
+    setForm();
+}
+const setSelectedValues = (propertyValue, value) => {
+    let allItems = document.querySelectorAll(propertyValue);
+    allItems.forEach(item => {
+        if(Array.isArray(value)) {
+            if (value.includes(item.value)) {
+                item.checked = true;
+            }
+        }
+        else if (item.value === value)
+            item.checked = true;
+    });    
+}
+const setForm = () => {
+    setValue('#name', employeePayrollObj._name);
+    setSelectedValues('[name=profile]', employeePayrollObj.profilePic);
+    setSelectedValues('[name=gender]', employeePayrollObj.gender);
+    setSelectedValues('[name=department]', employeePayrollObj.department);
+    setValue('#salary',employeePayrollObj.salary);
+    setTextValue('.salary-output', employeePayrollObj.salary);
+    setValue('#notes',employeePayrollObj.note);
+    let date = employeePayrollObj.date.split(" ");
+    setValue('#day', date[0]);
+    setValue('#month',date[1]);
+    setValue('#year',date[2]);
+}
+
 </script>  
 
 </body>
